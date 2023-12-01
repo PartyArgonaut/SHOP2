@@ -1,0 +1,3 @@
+파일의 이름을 보면 UUID가 적용된 것을 알 수 있다. FileService파일에 사용된 UUID. 
+
+구조 : [Low Time	4 / 8 (8자리)], [Mid time 2 / 4 (4자리)], [Mid time + version 2 / 4 (4자리)], [Clock sequence and variant 2 / 4 (4자리)], [Node	6 / 12 (12자리)]

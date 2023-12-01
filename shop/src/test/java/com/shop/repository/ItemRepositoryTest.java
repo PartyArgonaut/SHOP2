@@ -24,28 +24,39 @@ import java.util.List;
 
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
-class ItemRepositoryTest {
 
-    @Autowired
-    ItemRepository itemRepository;
+class ItemRepositoryTest {
 
     @PersistenceContext
     EntityManager em;
+    @Autowired
+    ItemRepository itemRepository;
 
     @Test
     @DisplayName("상품 저장 테스트")
+    public void createItemTest(){
+        Item item = new Item();
+        item.setItemNm("테스트 상품");
+        item.setPrice(10000);
+        item.setItemDetail("테스트 상품 상세 설명");
+        item.setItemSellStatus(ItemSellStatus.SELL);
+        item.setStockNumber(100);
+        item.setRegTime(LocalDateTime.now());
+        item.setUpdateTime(LocalDateTime.now());
+        Item savedItem = itemRepository.save(item);
+        System.out.println(savedItem.toString());
+    }
+
     public void createItemList(){
-        for(int i = 1; i <= 10; i++) {
+        for(int i=1;i<=10;i++){
             Item item = new Item();
             item.setItemNm("테스트 상품" + i);
             item.setPrice(10000 + i);
             item.setItemDetail("테스트 상품 상세 설명" + i);
             item.setItemSellStatus(ItemSellStatus.SELL);
-            item.setStockNumber(100);
-            item.setRegTime(LocalDateTime.now());
+            item.setStockNumber(100); item.setRegTime(LocalDateTime.now());
             item.setUpdateTime(LocalDateTime.now());
-            Item saveItem = itemRepository.save(item);
-
+            Item savedItem = itemRepository.save(item);
         }
     }
 
@@ -57,12 +68,11 @@ class ItemRepositoryTest {
         for(Item item : itemList){
             System.out.println(item.toString());
         }
-
     }
 
     @Test
     @DisplayName("상품명, 상품상세설명 or 테스트")
-    public void findByItemNmOrItemDetail(){
+    public void findByItemNmOrItemDetailTest(){
         this.createItemList();
         List<Item> itemList = itemRepository.findByItemNmOrItemDetail("테스트 상품1", "테스트 상품 상세 설명5");
         for(Item item : itemList){
@@ -72,13 +82,12 @@ class ItemRepositoryTest {
 
     @Test
     @DisplayName("가격 LessThan 테스트")
-    public void findBypriceLessThan(){
+    public void findByPriceLessThanTest(){
         this.createItemList();
         List<Item> itemList = itemRepository.findByPriceLessThan(10005);
         for(Item item : itemList){
             System.out.println(item.toString());
         }
-
     }
 
     @Test
@@ -106,8 +115,9 @@ class ItemRepositoryTest {
     public void findByItemDetailByNative(){
         this.createItemList();
         List<Item> itemList = itemRepository.findByItemDetailByNative("테스트 상품 상세 설명");
-        for(Item item : itemList) {
+        for(Item item : itemList){
             System.out.println(item.toString());
+
         }
     }
 
@@ -117,19 +127,20 @@ class ItemRepositoryTest {
         this.createItemList();
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QItem qItem = QItem.item;
-        JPAQuery<Item> query = queryFactory.selectFrom(qItem)
+        JPAQuery<Item> query  = queryFactory.selectFrom(qItem)
                 .where(qItem.itemSellStatus.eq(ItemSellStatus.SELL))
                 .where(qItem.itemDetail.like("%" + "테스트 상품 상세 설명" + "%"))
                 .orderBy(qItem.price.desc());
 
         List<Item> itemList = query.fetch();
+
         for(Item item : itemList){
             System.out.println(item.toString());
         }
     }
 
-    public void createItemList2() {
-        for (int i = 1; i <= 5; i++) {
+    public void createItemList2(){
+        for(int i=1;i<=5;i++){
             Item item = new Item();
             item.setItemNm("테스트 상품" + i);
             item.setPrice(10000 + i);
@@ -139,10 +150,9 @@ class ItemRepositoryTest {
             item.setRegTime(LocalDateTime.now());
             item.setUpdateTime(LocalDateTime.now());
             itemRepository.save(item);
-
         }
 
-        for (int i = 6; i <= 10; i++) {
+        for(int i=6;i<=10;i++){
             Item item = new Item();
             item.setItemNm("테스트 상품" + i);
             item.setPrice(10000 + i);
@@ -152,14 +162,15 @@ class ItemRepositoryTest {
             item.setRegTime(LocalDateTime.now());
             item.setUpdateTime(LocalDateTime.now());
             itemRepository.save(item);
-
         }
     }
 
     @Test
-    @DisplayName("상품 Querydsl 조회 테스트2")
+    @DisplayName("상품 Querydsl 조회 테스트 2")
     public void queryDslTest2(){
+
         this.createItemList2();
+
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         QItem item = QItem.item;
         String itemDetail = "테스트 상품 상세 설명";
@@ -168,24 +179,18 @@ class ItemRepositoryTest {
 
         booleanBuilder.and(item.itemDetail.like("%" + itemDetail + "%"));
         booleanBuilder.and(item.price.gt(price));
-
+        System.out.println(ItemSellStatus.SELL);
         if(StringUtils.equals(itemSellStat, ItemSellStatus.SELL)){
             booleanBuilder.and(item.itemSellStatus.eq(ItemSellStatus.SELL));
         }
 
         Pageable pageable = PageRequest.of(0, 5);
         Page<Item> itemPagingResult = itemRepository.findAll(booleanBuilder, pageable);
-        System.out.println("total elements : " + itemPagingResult.getTotalElements());
+        System.out.println("total elements : " + itemPagingResult. getTotalElements ());
 
         List<Item> resultItemList = itemPagingResult.getContent();
         for(Item resultItem: resultItemList){
             System.out.println(resultItem.toString());
         }
-
-
     }
-
-
-
-
 }
